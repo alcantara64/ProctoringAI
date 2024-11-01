@@ -8,6 +8,7 @@ Created on Fri May  1 22:45:22 2020
 import tensorflow as tf
 import numpy as np
 import cv2
+from utilities import record_video
 
 from tensorflow.keras import Model
 from tensorflow.keras.layers import (
@@ -340,17 +341,26 @@ def detect_phone_and_person(video_path):
         class_names = [c.strip() for c in open("models/classes.TXT").readlines()]
         boxes, scores, classes, nums = yolo(img)
         count=0
+        shouldRecordVideo = False
         for i in range(nums[0]):
             if int(classes[0][i] == 0):
                 count +=1
             if int(classes[0][i] == 67):
                 print('Mobile Phone detected')
+                shouldRecordVideo = True
         if count == 0:
             print('No person detected')
+            shouldRecordVideo = True
         elif count > 1: 
             print('More than one person detected')
+            shouldRecordVideo = True
             
         image = draw_outputs(image, (boxes, scores, classes, nums), class_names)
+        
+        if shouldRecordVideo:
+           record_video(cap)
+            
+        
 
         cv2.imshow('Prediction', image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
